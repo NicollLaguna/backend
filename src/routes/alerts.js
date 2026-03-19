@@ -9,10 +9,9 @@ const path = require("path");
 
 const DATA_FILE = path.join(__dirname, "../../data/alerts.json");
 
-// ✅ FUNCIÓN QUE FALTABA
+// ================= HISTORIAL =================
 function saveAlert(alert) {
   try {
-
     let data = [];
 
     if (fs.existsSync(DATA_FILE)) {
@@ -29,6 +28,7 @@ function saveAlert(alert) {
   }
 }
 
+// ================= WHATSAPP =================
 async function sendWhatsAppMessage(to, message) {
 
   const phoneNumberId = process.env.META_PHONE_NUMBER_ID;
@@ -40,9 +40,7 @@ async function sendWhatsAppMessage(to, message) {
     messaging_product: "whatsapp",
     to: to,
     type: "text",
-    text: {
-      body: message
-    }
+    text: { body: message }
   };
 
   const response = await fetch(url, {
@@ -61,6 +59,7 @@ async function sendWhatsAppMessage(to, message) {
   return data;
 }
 
+// ================= SEND ALERT =================
 router.post("/send", async (req, res) => {
 
   const {
@@ -75,12 +74,11 @@ router.post("/send", async (req, res) => {
   if (!hrBpm || !thresholdBpm || !secondsAbove) {
     return res.status(400).json({
       ok: false,
-      error: "missing_required_fields",
-      required: ["hrBpm", "thresholdBpm", "secondsAbove"]
+      error: "missing_required_fields"
     });
   }
 
-  if (!phones || phones.length === 0) {
+  if (!phones.length) {
     return res.status(400).json({
       ok: false,
       error: "phones_required"
@@ -105,4 +103,75 @@ router.post("/send", async (req, res) => {
     });
   }
 
-  lastAlerts[deviceKey] = now
+  lastAlerts[deviceKey] = now;
+
+  let message = `🚨 ALERTA MIJ@
+
+Paciente: ${patientName}
+
+Pulso actual: ${hrBpm} bpm
+Umbral configurado: ${thresholdBpm} bpm
+Tiempo sobre umbral: ${secondsAbove} segundos.`;
+
+  if (location) {
+    message += `
+
+Ubicación del paciente:
+${location}`;
+  }
+
+  message += `
+
+Se recomienda verificar el estado del paciente.`;
+
+  console.log("📢 Enviando alerta:", message);
+
+  for (const phone of phones) {
+    try {
+      await sendWhatsAppMessage(phone, message);
+      console.log("mensaje enviado a:", phone);
+    } catch (err) {
+      console.error("error enviando a", phone, err);
+    }
+  }
+
+  // ✅ guardar historial
+  saveAlert({
+    timestamp: new Date().toISOString(),
+    patientName,
+    deviceId: deviceKey,
+    hrBpm,
+    thresholdBpm,
+    secondsAbove,
+    phones,
+    location
+  });
+
+  return res.json({
+    ok: true,
+    message: "alert_sent"
+  });
+
+});
+
+// ================= HISTORY =================
+router.get("/history", (req, res) => {
+  try {
+
+    if (!fs.existsSync(DATA_FILE)) {
+      return res.json([]);
+    }
+
+    const raw = fs.readFileSync(DATA_FILE);
+    const data = JSON.parse(raw);
+
+    const last = data.slice(-50).reverse();
+
+    res.json(last);
+
+  } catch (err) {
+    res.status(500).json({ error: "error_reading_history" });
+  }
+});
+
+module.exports = router;
