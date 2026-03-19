@@ -91,9 +91,16 @@ let chart;
 
 function buildChart(data) {
 
-  const labels = data.map(a => new Date(a.timestamp).toLocaleTimeString());
-  const values = data.map(a => a.hrBpm);
+  // ordenar por tiempo ASCENDENTE (clave)
+  const sorted = [...data].sort(
+    (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+  );
 
+  const labels = sorted.map(a =>
+    new Date(a.timestamp).toLocaleTimeString()
+  );
+
+  const values = sorted.map(a => a.hrBpm);
   const ctx = document.getElementById("hrChart").getContext("2d");
 
   if (chart) {

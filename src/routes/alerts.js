@@ -93,29 +93,29 @@ router.post("/send", auth, async (req, res) => {
     lastAlerts[deviceKey] = 0;
   }
 
-  if (now - lastAlerts[deviceKey] < ALERT_INTERVAL) {
+//  if (now - lastAlerts[deviceKey] < ALERT_INTERVAL) {
 
-   console.log(`⚠️ alerta bloqueada (${deviceKey})`);
+//   console.log(`⚠️ alerta bloqueada (${deviceKey})`);
 
    // ✅ guardar aunque esté bloqueada
-   saveAlert({
-    timestamp: new Date().toISOString(),
-    patientName,
-    deviceId: deviceKey,
-    hrBpm,
-    thresholdBpm,
-    secondsAbove,
-    phones,
-    location,
-    status: "blocked"
-   });
+//   saveAlert({
+//    timestamp: new Date().toISOString(),
+//    patientName,
+//    deviceId: deviceKey,
+//    hrBpm,
+//    thresholdBpm,
+//    secondsAbove,
+//    phones,
+//    location,
+//    status: "blocked"
+//   });
 
-   return res.json({
-    ok: true,
-    message: "alert_blocked_by_antispam",
-    deviceId: deviceKey
-   });
-  }
+//   return res.json({
+//    ok: true,
+//    message: "alert_blocked_by_antispam",
+//    deviceId: deviceKey
+//   });
+//  }
 
   lastAlerts[deviceKey] = now;
 
