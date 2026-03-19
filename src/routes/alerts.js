@@ -9,6 +9,8 @@ const path = require("path");
 
 const DATA_FILE = path.join(__dirname, "../../data/alerts.json");
 
+const auth = require("../middleware/auth");
+
 // ================= HISTORIAL =================
 function saveAlert(alert) {
   try {
@@ -60,8 +62,7 @@ async function sendWhatsAppMessage(to, message) {
 }
 
 // ================= SEND ALERT =================
-router.post("/send", async (req, res) => {
-
+router.post("/send", auth, async (req, res) => {
   const {
     patientName = "Paciente",
     hrBpm,
