@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-let lastAlertTime = 0;
+const lastAlerts = {};
 const ALERT_INTERVAL = 2 * 60 * 1000; // 2 minutos
 
 async function sendWhatsAppMessage(to, message) {
@@ -64,18 +64,25 @@ router.post("/send", async (req, res) => {
 
   const now = Date.now();
 
-  if (now - lastAlertTime < ALERT_INTERVAL) {
+  const deviceKey = req.body.deviceId || "default";
 
-    console.log("⚠️ alerta bloqueada por anti-spam");
+  if (!lastAlerts[deviceKey]) {
+    lastAlerts[deviceKey] = 0;
+  }
+
+  if (now - lastAlerts[deviceKey] < ALERT_INTERVAL) {
+
+    console.log(`⚠️ alerta bloqueada (${deviceKey})`);
 
     return res.json({
       ok: true,
-      message: "alert_blocked_by_antispam"
-    });
+      message: "alert_blocked_by_antispam",
+      deviceId: deviceKey
+  });
 
   }
 
-  lastAlertTime = now;
+  lastAlerts[deviceKey] = now;
 
   let message =
 `🚨 ALERTA MIJ@
