@@ -9,7 +9,25 @@ const path = require("path");
 
 const DATA_FILE = path.join(__dirname, "../../data/alerts.json");
 
+// ✅ FUNCIÓN QUE FALTABA
+function saveAlert(alert) {
+  try {
 
+    let data = [];
+
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE);
+      data = JSON.parse(raw);
+    }
+
+    data.push(alert);
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+
+  } catch (err) {
+    console.error("Error guardando historial:", err);
+  }
+}
 
 async function sendWhatsAppMessage(to, message) {
 
@@ -70,7 +88,6 @@ router.post("/send", async (req, res) => {
   }
 
   const now = Date.now();
-
   const deviceKey = req.body.deviceId || "default";
 
   if (!lastAlerts[deviceKey]) {
@@ -81,92 +98,11 @@ router.post("/send", async (req, res) => {
 
     console.log(`⚠️ alerta bloqueada (${deviceKey})`);
 
-  saveAlert({
-    timestamp: new Date().toISOString(),
-    patientName,
-    deviceId: req.body.deviceId,
-    hrBpm,
-    thresholdBpm,
-    secondsAbove,
-    phones,
-    location
-  });
-
     return res.json({
       ok: true,
       message: "alert_blocked_by_antispam",
       deviceId: deviceKey
-  });
-
+    });
   }
 
-
-  lastAlerts[deviceKey] = now;
-
-  let message =
-`🚨 ALERTA MIJ@
-
-Paciente: ${patientName}
-
-Pulso actual: ${hrBpm} bpm
-Umbral configurado: ${thresholdBpm} bpm
-Tiempo sobre umbral: ${secondsAbove} segundos.`;
-
-  if (location) {
-    message += `
-
-Ubicación del paciente:
-${location}`;
-  }
-
-  message += `
-
-Se recomienda verificar el estado del paciente.`;
-
-  console.log("📢 Enviando alerta:", message);
-
-  for (const phone of phones) {
-
-    try {
-
-      await sendWhatsAppMessage(phone, message);
-
-      console.log("mensaje enviado a:", phone);
-
-    } catch (err) {
-
-      console.error("error enviando a", phone, err);
-
-    }
-
-  }
-
-  return res.json({
-    ok: true,
-    message: "alert_sent",
-    phones
-  });
-
-});
-
-  router.get("/history", (req, res) => {
-    try {
-
-      if (!fs.existsSync(DATA_FILE)) {
-        return res.json([]);
-      }
-
-      const raw = fs.readFileSync(DATA_FILE);
-      const data = JSON.parse(raw);
-
-      // devolver últimos 50
-      const last = data.slice(-50).reverse();
-
-      res.json(last);
-
-    } catch (err) {
-      res.status(500).json({ error: "error_reading_history" });
-    }
-  });
-
-module.exports = router;
+  lastAlerts[deviceKey] = now
