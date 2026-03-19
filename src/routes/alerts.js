@@ -4,6 +4,13 @@ const router = express.Router();
 const lastAlerts = {};
 const ALERT_INTERVAL = 2 * 60 * 1000; // 2 minutos
 
+const fs = require("fs");
+const path = require("path");
+
+const DATA_FILE = path.join(__dirname, "../../data/alerts.json");
+
+
+
 async function sendWhatsAppMessage(to, message) {
 
   const phoneNumberId = process.env.META_PHONE_NUMBER_ID;
@@ -74,6 +81,17 @@ router.post("/send", async (req, res) => {
 
     console.log(`⚠️ alerta bloqueada (${deviceKey})`);
 
+  saveAlert({
+    timestamp: new Date().toISOString(),
+    patientName,
+    deviceId: req.body.deviceId,
+    hrBpm,
+    thresholdBpm,
+    secondsAbove,
+    phones,
+    location
+  });
+
     return res.json({
       ok: true,
       message: "alert_blocked_by_antispam",
@@ -81,6 +99,26 @@ router.post("/send", async (req, res) => {
   });
 
   }
+
+  router.get("/history", (req, res) => {
+    try {
+
+      if (!fs.existsSync(DATA_FILE)) {
+        return res.json([]);
+      }
+
+      const raw = fs.readFileSync(DATA_FILE);
+      const data = JSON.parse(raw);
+
+      // devolver últimos 50
+      const last = data.slice(-50).reverse();
+
+      res.json(last);
+
+    } catch (err) {
+      res.status(500).json({ error: "error_reading_history" });
+    }
+  });
 
   lastAlerts[deviceKey] = now;
 
