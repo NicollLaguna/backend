@@ -100,25 +100,6 @@ router.post("/send", async (req, res) => {
 
   }
 
-  router.get("/history", (req, res) => {
-    try {
-
-      if (!fs.existsSync(DATA_FILE)) {
-        return res.json([]);
-      }
-
-      const raw = fs.readFileSync(DATA_FILE);
-      const data = JSON.parse(raw);
-
-      // devolver últimos 50
-      const last = data.slice(-50).reverse();
-
-      res.json(last);
-
-    } catch (err) {
-      res.status(500).json({ error: "error_reading_history" });
-    }
-  });
 
   lastAlerts[deviceKey] = now;
 
@@ -167,5 +148,25 @@ Se recomienda verificar el estado del paciente.`;
   });
 
 });
+
+  router.get("/history", (req, res) => {
+    try {
+
+      if (!fs.existsSync(DATA_FILE)) {
+        return res.json([]);
+      }
+
+      const raw = fs.readFileSync(DATA_FILE);
+      const data = JSON.parse(raw);
+
+      // devolver últimos 50
+      const last = data.slice(-50).reverse();
+
+      res.json(last);
+
+    } catch (err) {
+      res.status(500).json({ error: "error_reading_history" });
+    }
+  });
 
 module.exports = router;
