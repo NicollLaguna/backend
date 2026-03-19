@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MIJ@ Dashboard</title>
+  <style>
+    body { font-family: Arial; background:#0f172a; color:white; }
+    h1 { text-align:center; }
+    table {
+      width: 90%;
+      margin:auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #334155;
+      text-align: center;
+    }
+    th { background:#1e293b; }
+    tr:hover { background:#1e293b; }
+    .sent { color:#22c55e; }
+    .blocked { color:#f59e0b; }
+  </style>
+</head>
+
+<body>
+
+<h1>🚨 MIJ@ Dashboard</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Paciente</th>
+      <th>HR</th>
+      <th>Estado</th>
+      <th>Hora</th>
+      <th>Ubicación</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+
+const API = "https://mija-alert-backend-production.up.railway.app/api/alerts/history";
+
+async function loadData() {
+
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(alert => {
+
+      const tr = document.createElement("tr");
+
+      const statusClass = alert.status === "sent" ? "sent" : "blocked";
+      const statusText = alert.status === "sent" ? "⚠️ ALERTA" : "⏱️ BLOQUEADA";
+
+      tr.innerHTML = `
+        <td>${alert.patientName}</td>
+        <td>${alert.hrBpm}</td>
+        <td class="${statusClass}">${statusText}</td>
+        <td>${new Date(alert.timestamp).toLocaleTimeString()}</td>
+        <td>
+          ${alert.location ? `<a href="${alert.location}" target="_blank">📍 Ver</a>` : "-"}
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+
+    });
+
+  } catch (err) {
+    console.error("Error cargando datos", err);
+  }
+}
+
+// refrescar cada 5 segundos
+setInterval(loadData, 5000);
+loadData();
+
+</script>
+
+</body>
+</html>
