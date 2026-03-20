@@ -119,24 +119,43 @@ router.post("/send", auth, async (req, res) => {
 
   lastAlerts[deviceKey] = now;
 
-  let message = `🚨 ALERTA MIJ@
+  let message;
 
-Paciente: ${patientName}
+  // 👇 detectar tipo de alerta
+  if (deviceId && deviceId.startsWith("GEO")) {
 
-Pulso actual: ${hrBpm} bpm
-Umbral configurado: ${thresholdBpm} bpm
-Tiempo sobre umbral: ${secondsAbove} segundos.`;
+    // 🔥 GEOLOCALIZACIÓN
+    message = `🚨 ALERTA DE UBICACIÓN
 
-  if (location) {
-    message += `
+  Sr. Carlos se encuentra fuera de su zona segura.
 
-Ubicación del paciente:
-${location}`;
+  Ubicación actual:
+  ${location}
+
+  Se recomienda verificar inmediatamente.`;
+
+  } else {
+
+    // ❤️ ALERTA HR
+    message = `🚨 ALERTA MIJ@
+
+  Paciente: ${patientName}
+
+  Pulso actual: ${hrBpm} bpm
+  Umbral configurado: ${thresholdBpm} bpm
+  Tiempo sobre umbral: ${secondsAbove} segundos.`;
+
+    if (location) {
+      message += `
+
+  Ubicación del paciente:
+  ${location}`;
   }
 
-  message += `
+    message += `
 
-Se recomienda verificar el estado del paciente.`;
+  Se recomienda verificar el estado del paciente.`;
+  }
 
   console.log("📢 Enviando alerta:", message);
 
