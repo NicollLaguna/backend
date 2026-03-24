@@ -121,22 +121,17 @@ router.post("/send", auth, async (req, res) => {
 
   let message;
 
-  // 👇 detectar tipo de alerta
   if (deviceId && deviceId.startsWith("GEO")) {
 
-    // 🔥 GEOLOCALIZACIÓN
     message = `🚨 ALERTA DE UBICACIÓN
 
-  Sr. Carlos se encuentra fuera de su zona segura.
+  Alerta!!, el Sr. Carlos se encuentra fuera de su zona segura.
 
-  Ubicación actual:
-  ${location}
-
-  Se recomienda verificar inmediatamente.`;
+  Ubicación:
+  ${location}`;
 
   } else {
 
-    // ❤️ ALERTA HR
     message = `🚨 ALERTA MIJ@
 
   Paciente: ${patientName}
@@ -150,7 +145,7 @@ router.post("/send", auth, async (req, res) => {
 
   Ubicación del paciente:
   ${location}`;
-  }
+    }
 
     message += `
 
