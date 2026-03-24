@@ -137,7 +137,7 @@ router.post("/send", auth, async (req, res) => {
 
   Ubicación:
   ${location}`;
-
+  }
   Se recomienda verificar inmediatamente.`;
 
     return sendToWhatsApp(message); // o tu flujo existente
