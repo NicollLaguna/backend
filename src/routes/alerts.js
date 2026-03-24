@@ -72,13 +72,18 @@ router.post("/send", auth, async (req, res) => {
     location
   } = req.body;
 
-  if (!hrBpm || !thresholdBpm || !secondsAbove) {
+  // 🔥 permitir alertas HR y GEO
+  if (
+    hrBpm === undefined ||
+    thresholdBpm === undefined ||
+    secondsAbove === undefined
+  ) {
     return res.status(400).json({
       ok: false,
-      error: "missing_required_fields"
+      error: "missing_required_fields",
+      required: ["hrBpm", "thresholdBpm", "secondsAbove"]
     });
   }
-
   if (!phones.length) {
     return res.status(400).json({
       ok: false,
