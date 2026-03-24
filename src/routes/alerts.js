@@ -65,13 +65,13 @@ async function sendWhatsAppMessage(to, message) {
 router.post("/send", auth, async (req, res) => {
   const {
     patientName = "Paciente",
+    deviceId,
     hrBpm,
     thresholdBpm,
     secondsAbove,
     phones = [],
     location
   } = req.body;
-
   // 🔥 permitir alertas HR y GEO
   if (
     hrBpm === undefined ||
