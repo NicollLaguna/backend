@@ -11,8 +11,6 @@ const DATA_FILE = path.join(__dirname, "../../data/alerts.json");
 
 const auth = require("../middleware/auth");
 
-const fetch = require("node-fetch");
-
 // ================= HISTORIAL =================
 function saveAlert(alert) {
   try {
