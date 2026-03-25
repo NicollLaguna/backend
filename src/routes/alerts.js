@@ -11,6 +11,8 @@ const DATA_FILE = path.join(__dirname, "../../data/alerts.json");
 
 const auth = require("../middleware/auth");
 
+const fetch = require("node-fetch");
+
 // ================= HISTORIAL =================
 function saveAlert(alert) {
   try {
@@ -56,7 +58,11 @@ async function sendWhatsAppMessage(to, message) {
 
   const data = await response.json();
 
-  console.log("WhatsApp response:", data);
+  if (!response.ok) {
+    console.error("❌ WhatsApp error:", data);
+  } else {
+    console.log("✅ WhatsApp enviado:", data);
+  }
 
   return data;
 }
