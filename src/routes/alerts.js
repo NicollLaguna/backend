@@ -124,24 +124,38 @@ router.post("/send", auth, async (req, res) => {
 
   lastAlerts[deviceKey] = now;
 
-  let message;
+let message;
 
-  if (deviceId && deviceId.startsWith("GEO")) {
+// 🔥 ALERTA GEO
+if (deviceId && deviceId.startsWith("GEO")) {
 
-    const parts = deviceId.split("-");
-    const distanceKm = parts.length > 2 ? parts[2] : "?";
+  const parts = deviceId.split("-");
+  const distanceKm = parts.length > 2 ? parts[2] : "?";
 
-    message = `🚨 ALERTA DE UBICACIÓN
+  message =
+    "🚨 ALERTA DE UBICACIÓN\n\n" +
+    `Alerta!!, Sr. Carlos, se encuentra ud. a ${distanceKm} km de su lugar de origen, ¿Se encuentra ud. desorientado?\n\n` +
+    "Ubicación:\n" +
+    `${location}`;
 
-  Alerta!!, Sr. Carlos, se encuentra ud. a ${distanceKm} km de su lugar de origen, ¿Se encuentra ud. desorientado?
+} else {
 
-  Ubicación:
-  ${location}`;
+  // ❤️ ALERTA HR
+  message =
+    "🚨 ALERTA MIJ@\n\n" +
+    `Paciente: ${patientName}\n\n` +
+    `Pulso actual: ${hrBpm} bpm\n` +
+    `Umbral configurado: ${thresholdBpm} bpm\n` +
+    `Tiempo sobre umbral: ${secondsAbove} segundos.\n\n`;
+
+  if (location) {
+    message +=
+      "Ubicación del paciente:\n" +
+      `${location}\n\n`;
   }
-  Se recomienda verificar inmediatamente.`;
 
-    return sendToWhatsApp(message); // o tu flujo existente
-  }
+  message += "Se recomienda verificar el estado del paciente.";
+}
 
   console.log("📢 Enviando alerta:", message);
 
