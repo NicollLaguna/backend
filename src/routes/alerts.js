@@ -128,10 +128,22 @@ router.post("/send", auth, async (req, res) => {
 
   lastAlerts[deviceKey] = now;
 
+
 let message;
 
+// 🆕 PRIORIDAD: mensaje personalizado desde Flutter
+if (req.body.message) {
+
+  message = req.body.message;
+
+  // agregar ubicación si existe
+  if (location) {
+    message += "\n\nUbicación:\n" + location;
+  }
+
+}
 // 🔥 ALERTA GEO
-if (deviceId && deviceId.startsWith("GEO")) {
+else if (deviceId && deviceId.startsWith("GEO")) {
 
   const parts = deviceId.split("-");
   const distanceKm = parts.length > 2 ? parts[2] : "?";
@@ -142,9 +154,10 @@ if (deviceId && deviceId.startsWith("GEO")) {
     "Ubicación:\n" +
     `${location}`;
 
-} else {
+}
+// ❤️ ALERTA HR
+else {
 
-  // ❤️ ALERTA HR
   message =
     "🚨 ALERTA MIJ@\n\n" +
     `Paciente: ${patientName}\n\n` +
